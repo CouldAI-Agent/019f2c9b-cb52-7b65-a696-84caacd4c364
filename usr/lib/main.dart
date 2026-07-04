@@ -1,67 +1,125 @@
 import 'package:flutter/material.dart';
+import 'screens/emulator_screen.dart';
+import 'screens/theory_screen.dart';
+import 'screens/resources_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const TenEmulatorApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TenEmulatorApp extends StatelessWidget {
+  const TenEmulatorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Ten Emulator',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.dark,
+        primarySwatch: Colors.deepPurple,
+        scaffoldBackgroundColor: const Color(0xFF0F0F17),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1A1A24),
+          elevation: 0,
+        ),
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        '/': (context) => const MainLayout(),
+        '/emulator': (context) => const EmulatorScreen(),
+        '/theory': (context) => const TheoryScreen(),
+        '/resources': (context) => const ResourcesScreen(),
       },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class MainLayout extends StatefulWidget {
+  const MainLayout({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainLayout> createState() => _MainLayoutState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class _MainLayoutState extends State<MainLayout> {
+  int _currentIndex = 0;
+  final List<Widget> _screens = [
+    const EmulatorScreen(),
+    const TheoryScreen(),
+    const ResourcesScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
+    if (isDesktop) {
+      return Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              backgroundColor: const Color(0xFF1A1A24),
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.hub_outlined),
+                  selectedIcon: Icon(Icons.hub),
+                  label: Text('Emulator'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.menu_book_outlined),
+                  selectedIcon: Icon(Icons.menu_book),
+                  label: Text('Theory'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.link_outlined),
+                  selectedIcon: Icon(Icons.link),
+                  label: Text('Resources'),
+                ),
+              ],
+            ),
+            const VerticalDivider(thickness: 1, width: 1, color: Colors.black26),
+            Expanded(child: _screens[_currentIndex]),
           ],
         ),
+      );
+    }
+
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: const Color(0xFF1A1A24),
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.hub_outlined),
+            selectedIcon: Icon(Icons.hub),
+            label: 'Emulator',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            selectedIcon: Icon(Icons.menu_book),
+            label: 'Theory',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.link_outlined),
+            selectedIcon: Icon(Icons.link),
+            label: 'Resources',
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), 
     );
   }
 }
